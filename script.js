@@ -124,6 +124,7 @@ function ready() {
         })
         api.setUrl('/movie/'+id+'/similar');
         this.getMoviesList();
+        document.documentElement.scrollTop = 0;
 
       },
       changePage: function(page) {
