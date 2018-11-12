@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>TITLE</title>
+
+<meta name="keywords" content="">
+<meta name="description" content="" />
+
+<meta property="og:description" content='' />
+<meta property="og:image" content="" />
+<meta property="og:title" content="" />
+
+
+<script src="axios.min.js"></script>
+
+<script src="vue.js"></script>
+<script src="vue-router.js"></script>
+<script src="lodash.min.js"></script>
+
+<script src="iview.min.js"></script>
+<script src="en-US.js"></script>
+
+<script type="text/javascript" src="script.js"></script>
+
+<link rel="stylesheet" href="iview.css" />
+<link rel="stylesheet" href="style.css" />
+
+</head>
+<body>
+
+
+  <div id="app">
+
+
+
+    <section v-if="errored">
+      <p>We're sorry, we're not able to retrieve this information at the moment, please try back later</p>
+    </section>
+
+    <section v-else>
+      <div v-if="loading" class="loading"></div>
+
+      <template>
+
+
+        <router-view :key="$route.fillPath"></router-view>
+
+        <div class="search">
+                     <Menu mode="horizontal">
+                       Search:
+                       <template>
+                           <Auto-Complete
+                               v-model="search_value"
+                               @on-search="handleSearch"
+                               placeholder="input text"
+                               style="width:200px">
+                               <li class="ivu-select-item" v-for="item in search_list" :key="item.id">
+                                 <router-link :to="{name: 'movie', params: { movieId: item.id }}">{{item.title}}</router-link>
+                               </li>
+                           </Auto-Complete>
+                       </template>
+
+
+          </div>
+
+
+        <div v-if="movie_details" class="movie_details">
+            <img :src="secure_base_url+poster_sizes[2]+'/'+movie_details.poster_path">
+            <div class="info">
+              <h1>{{movie_details.title}}</h1>
+              <div>{{movie_details.release_date.substr(0,4)}}</div>
+              <div class="stars">
+                <Icon type="ios-star" v-for="n in Math.floor(movie_details.vote_average)" :key="n"></Icon><Icon type="ios-star-half" v-if="movie_details.vote_average - Math.floor(movie_details.vote_average) >= 0.5"></Icon>
+                  {{movie_details.vote_average}}
+              </div>
+              <div>{{movie_details.overview}}</div>
+              <span v-for="genre in movie_details.genres" class="genre">
+                <router-link :to="{name: 'genre', params: { genreId: genre.id }}">{{genre.name}}</router-link>
+              </span>
+            </div>
+        </div>
+
+
+        <h2 v-if="$route.name=='genre'">Genre: {{genreIdtoName($route.params.genreId)}}</h2>
+        <h2 v-else-if="$route.name=='movie'">Related movies for «{{movie_details.title}}»</h2>
+        <h2 v-else>Popular Movies</h2>
+
+        <div class="pages">
+          <Page :total="movies.total_results" :page-size="20" :current="movies.page" v-on:on-change="changePage($event)"/>
+        </div>
+
+      <div class="movies_list">
+        <div v-for="movie in movies.results">
+
+          <card>
+            <p slot="title">
+                            <Icon type="ios-film-outline"></Icon>
+                            <router-link :to="{name: 'movie', params: { movieId: movie.id }}">{{movie.title}}</router-link>
+              </p>
+
+
+              <router-link :to="{name: 'movie', params: { movieId: movie.id }}">
+                <div class="poster" v-bind:style = "'background: url(\''+secure_base_url+poster_sizes[2]+'/'+movie.poster_path+'\') no-repeat center center / cover'" class="poster"></div>
+              </router-link>
+
+              <div class="other_info">
+
+              <div class="stars">
+                <Icon type="ios-star" v-for="n in Math.floor(movie.vote_average)" :key="n"></Icon><Icon type="ios-star-half" v-if="movie.vote_average - Math.floor(movie.vote_average) >= 0.5"></Icon>
+                  {{movie.vote_average}}
+              </div>
+               Genres:
+                <span v-for="genre in movie.genre_ids" class="genre">
+                  <router-link :to="{name: 'genre', params: { genreId: genre }}">{{genreIdtoName(genre)}}</router-link>
+                </span>
+
+
+              </div>
+
+
+        </card>
+
+
+        </div>
+      </div>
+      <div class="pages">
+        <Page :total="movies.total_results" :page-size="20" :current="movies.page" v-on:on-change="changePage($event)"/>
+      </div>
+      </template>
+
+    </section>
+
+    </div>
+
+</body>
+</html>
